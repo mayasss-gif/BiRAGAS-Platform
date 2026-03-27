@@ -130,6 +130,25 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font
 /* Footer */
 .footer{text-align:center;padding:40px;border-top:1px solid var(--border);font-size:0.68rem;color:var(--text2)}
 
+/* Demo buttons + plot containers */
+.btn-demo{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border-radius:8px;font-size:0.72rem;font-weight:600;border:none;cursor:pointer;font-family:var(--sans);transition:all 0.25s;background:rgba(100,181,246,0.1);color:var(--blue);border:1px solid rgba(100,181,246,0.2)}
+.btn-demo:hover{background:rgba(100,181,246,0.2);box-shadow:0 2px 12px rgba(100,181,246,0.2)}
+.demo-result{display:none;margin-top:20px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:24px;animation:fadeIn 0.5s ease}
+.demo-result.show{display:block}
+.plot-row{display:flex;gap:16px;margin-top:16px;flex-wrap:wrap}
+.plot-box{flex:1;min-width:280px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:16px}
+.plot-box h5{font-size:0.68rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.plot-box canvas{width:100%!important;max-height:280px}
+.demo-table{width:100%;border-collapse:collapse;font-size:0.76rem;margin-top:10px}
+.demo-table th{text-align:left;padding:8px 10px;color:var(--text2);font-size:0.62rem;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)}
+.demo-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.demo-table tr:hover td{background:rgba(100,181,246,0.03)}
+.score-bar{height:4px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden;min-width:50px;display:inline-block;width:60px;vertical-align:middle;margin-left:6px}
+.score-fill{height:100%;border-radius:2px}
+.demo-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.demo-header h4{font-size:0.92rem;font-weight:700;color:var(--heading)}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:1000px){.features-grid,.phase-grid{grid-template-columns:1fr 1fr}.arch-grid,.cap-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.flow{flex-direction:column}.flow-step{border-radius:var(--radius)!important}}
@@ -189,20 +208,24 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font
       <h3 style="color:var(--blue)">Population Evidence</h3>
       <p>DESeq2 differential expression, GSEA pathway enrichment, CIBERSORTx immune deconvolution. Purely correlational — <strong style="color:var(--heading)">no causal claims allowed</strong> at this layer.</p>
       <div style="margin-top:12px"><span class="tag tag-blue">DESeq2</span><span class="tag tag-blue">GSEA</span><span class="tag tag-blue">CIBERSORTx</span><span class="tag tag-blue">EdgeR</span><span class="tag tag-blue">Limma</span></div>
+      <button class="btn-demo" style="margin-top:14px" onclick="runDemo('layer1')">&#9654; Run Demo</button>
     </div>
     <div class="arch-card">
       <div class="arch-num">2</div>
       <h3 style="color:var(--purple)">Contextualization</h3>
       <p>BiRAGAS chromatin filtering + knowledge graph pruning. Maps correlations to biological plausibility using 8.6M Bio-RAG vectors. Candidates become <strong style="color:var(--heading)">plausible, not proven</strong>.</p>
       <div style="margin-top:12px"><span class="tag tag-purple">Bio-RAG 8.6M</span><span class="tag tag-purple">KG Pruning</span><span class="tag tag-purple">Chromatin Filter</span></div>
+      <button class="btn-demo" style="margin-top:14px" onclick="runDemo('layer2')">&#9654; Run Demo</button>
     </div>
     <div class="arch-card">
       <div class="arch-num">3</div>
       <h3 style="color:var(--green)">Agentic Causal Reasoning</h3>
       <p>NOTEARS structure learning + DoWhy causal graphs + EconML treatment effects + Refutation testing. Only edges surviving all tests are labeled <strong style="color:var(--heading)">causally validated</strong>.</p>
       <div style="margin-top:12px"><span class="tag tag-green">NOTEARS</span><span class="tag tag-green">DoWhy</span><span class="tag tag-green">EconML</span><span class="tag tag-green">Refutation</span></div>
+      <button class="btn-demo" style="margin-top:14px" onclick="runDemo('layer3')">&#9654; Run Demo</button>
     </div>
   </div>
+  <div class="demo-result" id="demo-arch"><div class="plot-row"><div class="plot-box"><h5>Layer Transition Scores</h5><canvas id="ch-arch-bar"></canvas></div><div class="plot-box"><h5>Evidence Distribution</h5><canvas id="ch-arch-pie"></canvas></div></div></div>
 </section>
 
 <!-- 28 TOOLS -->
@@ -212,27 +235,29 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font
   <p class="section-sub">CRISPR design, causal inference, drug discovery, single-cell, multi-omics — all unified.</p>
 
   <div class="features-grid">
-    <div class="feature-card"><div class="feature-icon" style="background:var(--blue-bg)">&#9998;</div><h4>Guide Design</h4><p>SpCas9, SaCas9, Cas12a, Cas13a/b/d, dCas13 — 18-feature scoring + RS3 ML</p><div class="feature-badge tag-blue">6 Nucleases</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--blue-bg)">&#9876;</div><h4>Knockout Engine</h4><p>7-method ensemble: Topological, Bayesian, Monte Carlo, Pathway, Feedback, ODE, MI</p><div class="feature-badge tag-blue">210,859 Configs</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--purple-bg)">&#10006;</div><h4>Combination Engine</h4><p>12 synergy models: 6 classical + 6 cross-modal (DNA&times;RNA). First-ever cross-modal predictor</p><div class="feature-badge tag-purple">88.9 Billion</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--green-bg)">&#10004;</div><h4>Causality Framework</h4><p>7-phase, 23-module pipeline — Pearl's do-calculus, MR validation, DAG self-correction</p><div class="feature-badge tag-green">23 Modules</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--purple-bg)">&#10070;</div><h4>RNA Engines</h4><p>Cas13 knockdown, base editing (A&rarr;I, C&rarr;U), CRISPRi/CRISPRa, ncRNA targeting</p><div class="feature-badge tag-purple">9 RNA Types</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--blue-bg)">&#9733;</div><h4>ACE Scoring</h4><p>15-stream Aggregated CRISPR Evidence with Bayesian confidence updating</p><div class="feature-badge tag-blue">15 Streams</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:rgba(239,154,154,0.1)">&#9650;</div><h4>DEG Pipeline</h4><p>Agentic DESeq2/EdgeR/Limma — auto-selects method, fixes errors, maps genes</p><div class="feature-badge tag-red">7 Tools</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--green-bg)">&#9783;</div><h4>Pathway Enrichment</h4><p>5-stage pipeline: KEGG, Reactome, GO with deduplication and consolidation</p><div class="feature-badge tag-green">KEGG/Reactome/GO</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:rgba(255,183,77,0.1)">&#9764;</div><h4>Drug Discovery</h4><p>KEGG drug mapping + 7-dimension target ranking + druggability scoring</p><div class="feature-badge tag-orange">7D Ranking</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--purple-bg)">&#9673;</div><h4>Deconvolution</h4><p>xCell (64 types), CIBERSORTx (22 immune), Bisque (reference-based)</p><div class="feature-badge tag-purple">3 Methods</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--blue-bg)">&#9679;</div><h4>Single-Cell</h4><p>10x Genomics: QC &rarr; PCA &rarr; UMAP &rarr; Leiden &rarr; Perturb-seq/CROP-seq</p><div class="feature-badge tag-blue">10x Pipeline</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--green-bg)">&#9881;</div><h4>Multi-Omics</h4><p>5-layer MOFA+ integration: genomics, transcriptomics, epigenomics, proteomics, metabolomics</p><div class="feature-badge tag-green">5 Layers</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:rgba(239,154,154,0.1)">&#9670;</div><h4>GWAS / MR</h4><p>5-method MR: IVW, Egger, Weighted Median, MR-PRESSO, CAUSE + sensitivity</p><div class="feature-badge tag-red">5 MR Methods</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:rgba(255,183,77,0.1)">&#9655;</div><h4>Perturbation</h4><p>Cross-modal DNA&times;RNA perturbation with counterfactual simulation</p><div class="feature-badge tag-orange">Cross-Modal</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:rgba(77,208,225,0.1)">&#128737;</div><h4>Safety Assessor</h4><p>5-dimension safety: essentiality, pleiotropy, off-target, toxicity, therapeutic window</p><div class="feature-badge tag-cyan">5D Safety</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:rgba(244,143,177,0.1)">&#9888;</div><h4>Resistance Predictor</h4><p>Feedback loops, bypass pathways, efflux, target mutations, pathway redundancy</p><div class="feature-badge tag-pink">5 Mechanisms</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--blue-bg)">&#128202;</div><h4>Visualization</h4><p>Volcano, heatmaps, UMAP, Manhattan, radar, synergy matrices — auto-generated</p><div class="feature-badge tag-blue">Auto-Plots</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--green-bg)">&#9654;</div><h4>Full Pipeline</h4><p>All 837+ modules end-to-end — DEG to drug candidates in one autonomous run</p><div class="feature-badge tag-green">837 Modules</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:var(--purple-bg)">&#128300;</div><h4>Counterfactual Sim</h4><p>Pearl's do(X) interventions: knockout, overexpress, pathway inhibition with DAG propagation</p><div class="feature-badge tag-purple">do-Calculus</div></div>
-    <div class="feature-card"><div class="feature-icon" style="background:rgba(77,208,225,0.1)">&#128101;</div><h4>Patient Stratifier</h4><p>DAG-based cohort clustering — per-patient causal architecture, not population average</p><div class="feature-badge tag-cyan">Per-Patient DAGs</div></div>
+    <div class="feature-card" onclick="runDemo('guide')"><div class="feature-icon" style="background:var(--blue-bg)">&#9998;</div><h4>Guide Design</h4><p>SpCas9, SaCas9, Cas12a, Cas13a/b/d, dCas13 — 18-feature scoring + RS3 ML</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-blue">6 Nucleases</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('knockout')"><div class="feature-icon" style="background:var(--blue-bg)">&#9876;</div><h4>Knockout Engine</h4><p>7-method ensemble: Topological, Bayesian, Monte Carlo, Pathway, Feedback, ODE, MI</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-blue">210,859 Configs</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('combo')"><div class="feature-icon" style="background:var(--purple-bg)">&#10006;</div><h4>Combination Engine</h4><p>12 synergy models: 6 classical + 6 cross-modal (DNA&times;RNA)</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-purple">88.9 Billion</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('causality')"><div class="feature-icon" style="background:var(--green-bg)">&#10004;</div><h4>Causality Framework</h4><p>7-phase, 23-module pipeline — Pearl's do-calculus, MR, DAG self-correction</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-green">23 Modules</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('rna')"><div class="feature-icon" style="background:var(--purple-bg)">&#10070;</div><h4>RNA Engines</h4><p>Cas13 knockdown, base editing (A&rarr;I, C&rarr;U), CRISPRi/CRISPRa, ncRNA</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-purple">9 RNA Types</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('ace')"><div class="feature-icon" style="background:var(--blue-bg)">&#9733;</div><h4>ACE Scoring</h4><p>15-stream Aggregated CRISPR Evidence with Bayesian confidence</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-blue">15 Streams</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('deg')"><div class="feature-icon" style="background:rgba(239,154,154,0.1)">&#9650;</div><h4>DEG Pipeline</h4><p>Agentic DESeq2/EdgeR/Limma — auto-selects, fixes errors, maps genes</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-red">7 Tools</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('pathway')"><div class="feature-icon" style="background:var(--green-bg)">&#9783;</div><h4>Pathway Enrichment</h4><p>5-stage pipeline: KEGG, Reactome, GO with deduplication</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-green">KEGG/Reactome/GO</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('drug')"><div class="feature-icon" style="background:rgba(255,183,77,0.1)">&#9764;</div><h4>Drug Discovery</h4><p>KEGG drug mapping + 7D target ranking + druggability</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-orange">7D Ranking</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('deconv')"><div class="feature-icon" style="background:var(--purple-bg)">&#9673;</div><h4>Deconvolution</h4><p>xCell (64 types), CIBERSORTx (22 immune), Bisque</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-purple">3 Methods</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('sc')"><div class="feature-icon" style="background:var(--blue-bg)">&#9679;</div><h4>Single-Cell</h4><p>10x Genomics: QC &rarr; PCA &rarr; UMAP &rarr; Leiden &rarr; Perturb-seq</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-blue">10x Pipeline</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('multiomics')"><div class="feature-icon" style="background:var(--green-bg)">&#9881;</div><h4>Multi-Omics</h4><p>5-layer MOFA+: genomics, transcriptomics, epigenomics, proteomics, metabolomics</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-green">5 Layers</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('gwas')"><div class="feature-icon" style="background:rgba(239,154,154,0.1)">&#9670;</div><h4>GWAS / MR</h4><p>5-method MR: IVW, Egger, Weighted Median, MR-PRESSO, CAUSE</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-red">5 MR Methods</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('perturb')"><div class="feature-icon" style="background:rgba(255,183,77,0.1)">&#9655;</div><h4>Perturbation</h4><p>Cross-modal DNA&times;RNA perturbation with counterfactual simulation</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-orange">Cross-Modal</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('safety')"><div class="feature-icon" style="background:rgba(77,208,225,0.1)">&#128737;</div><h4>Safety Assessor</h4><p>5D: essentiality, pleiotropy, off-target, toxicity, therapeutic window</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-cyan">5D Safety</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('resistance')"><div class="feature-icon" style="background:rgba(244,143,177,0.1)">&#9888;</div><h4>Resistance Predictor</h4><p>Feedback loops, bypass, efflux, mutations, redundancy</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-pink">5 Mechanisms</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('viz')"><div class="feature-icon" style="background:var(--blue-bg)">&#128202;</div><h4>Visualization</h4><p>Volcano, heatmaps, UMAP, Manhattan, radar, synergy — auto-generated</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-blue">Auto-Plots</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('pipeline')"><div class="feature-icon" style="background:var(--green-bg)">&#9654;</div><h4>Full Pipeline</h4><p>All 837+ modules end-to-end — DEG to drug candidates</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-green">837 Modules</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('counterfactual')"><div class="feature-icon" style="background:var(--purple-bg)">&#128300;</div><h4>Counterfactual Sim</h4><p>Pearl's do(X): knockout, overexpress, pathway inhibition</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-purple">do-Calculus</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
+    <div class="feature-card" onclick="runDemo('stratify')"><div class="feature-icon" style="background:rgba(77,208,225,0.1)">&#128101;</div><h4>Patient Stratifier</h4><p>DAG-based cohort clustering — per-patient causal architecture</p><div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div class="feature-badge tag-cyan">Per-Patient DAGs</div><span class="btn-demo" style="padding:4px 10px;font-size:0.62rem">&#9654; Demo</span></div></div>
   </div>
+  <!-- Tools demo output area -->
+  <div class="demo-result" id="demo-tools"><div id="demo-tools-content"></div></div>
 </section>
 
 <!-- 7-PHASE CAUSALITY -->
@@ -251,6 +276,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font
     <div class="phase-card" style="border-left:3px solid var(--pink)"><h4><span class="tag tag-pink">P7</span> Arbitration</h4><p>Evidence Inspector + Gap Analyzer + LLM Arbitrator + Response Formatter. Full audit trail.</p></div>
     <div class="phase-card" style="border-left:3px solid var(--green);background:rgba(129,199,132,0.04)"><h4><span style="font-size:1rem">&#129302;</span> Agentic AI</h4><p>Self-correcting DAG: cycle removal, orphan connection, weight normalization. 9 autonomous checks.</p></div>
   </div>
+  <div style="text-align:center;margin-top:20px"><button class="btn-demo" style="padding:10px 24px;font-size:0.82rem" onclick="runDemo('phases')">&#9654; Run 7-Phase Demo (PDAC)</button></div>
+  <div class="demo-result" id="demo-phases"><div class="plot-row"><div class="plot-box"><h5>Phase Completion (Pass/Fail)</h5><canvas id="ch-phases-bar"></canvas></div><div class="plot-box"><h5>Module Distribution</h5><canvas id="ch-phases-pie"></canvas></div></div></div>
 </section>
 
 <!-- QC SHIELD -->
@@ -285,6 +312,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font
       </p>
     </div>
   </div>
+  <div style="text-align:center;margin-top:20px"><button class="btn-demo" style="padding:10px 24px;font-size:0.82rem" onclick="runDemo('qc')">&#9654; Run QC Shield Demo</button></div>
+  <div class="demo-result" id="demo-qc"><div class="plot-row"><div class="plot-box"><h5>Hallucination Detection by Category</h5><canvas id="ch-qc-bar"></canvas></div><div class="plot-box"><h5>QC Gate Pass/Fail/Warn</h5><canvas id="ch-qc-pie"></canvas></div></div></div>
 </section>
 
 <!-- CRISPR + DRUG ENGINES -->
@@ -316,6 +345,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font
       <div style="margin-top:6px"><span class="tag tag-red">Feedback Loops</span><span class="tag tag-orange">Bypass Pathways</span><span class="tag tag-pink">Efflux/Metabolism</span><span class="tag tag-purple">Target Mutations</span><span class="tag tag-cyan">Redundancy</span></div>
     </div>
   </div>
+  <div style="text-align:center;margin-top:20px"><button class="btn-demo" style="padding:10px 24px;font-size:0.82rem" onclick="runDemo('engines')">&#9654; Run All Engines Demo</button></div>
+  <div class="demo-result" id="demo-engines"><div class="plot-row"><div class="plot-box"><h5>Druggability Scores</h5><canvas id="ch-eng-drug"></canvas></div><div class="plot-box"><h5>Synergy Model Contributions</h5><canvas id="ch-eng-syn"></canvas></div></div><div class="plot-row"><div class="plot-box"><h5>Safety Profile (5D)</h5><canvas id="ch-eng-safety"></canvas></div><div class="plot-box"><h5>Resistance Mechanisms</h5><canvas id="ch-eng-resist"></canvas></div></div></div>
 </section>
 
 <!-- PIPELINE FLOW -->
@@ -335,6 +366,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font
     <div class="flow-arrow">&rarr;</div>
     <div class="flow-step"><div class="flow-num">5</div><h4>Results</h4><p>Ranked targets, drug candidates, safety profiles, plots</p></div>
   </div>
+  <div style="text-align:center;margin-top:20px"><button class="btn-demo" style="padding:10px 28px;font-size:0.88rem" onclick="runDemo('fullpipe')">&#9654; Run Full 837-Module Pipeline Demo</button></div>
+  <div class="demo-result" id="demo-fullpipe"><div id="demo-fullpipe-content"></div></div>
 </section>
 
 <!-- CONTACT -->
@@ -377,7 +410,134 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font
 <div class="footer">BiRAGAS Platform v3.0 &mdash; Ayass Bioscience LLC &mdash; 837+ modules &bull; 23 causality modules &bull; 88.9B combinations &bull; 7 causal phases &bull; 3 QC layers<br><span style="color:var(--blue)">Proprietary &amp; Confidential &mdash; 2026</span></div>
 
 <script>
-/* Contact form — sends directly via formsubmit.co */
+const R=(a,b)=>Math.random()*(b-a)+a;
+const C=['#64b5f6','#ce93d8','#81c784','#ef9a9a','#ffb74d','#4fc3f7','#f48fb1','#aed581','#90a4ae','#ffcc80','#80deea','#b39ddb'];
+const CA=C.map(c=>c+'55');
+const charts={};
+function mk(id,cfg){if(charts[id])charts[id].destroy();Chart.defaults.color='rgba(255,255,255,0.5)';Chart.defaults.borderColor='rgba(255,255,255,0.06)';charts[id]=new Chart(document.getElementById(id),cfg)}
+const GENES=['KRAS','BRAF','TP53','PIK3CA','MYC','EGFR','AKT1','PTEN','SMAD4','CDKN2A','CDK4','RB1'];
+
+function runDemo(type){
+  // Show relevant demo result area
+  const targets={
+    layer1:'demo-arch',layer2:'demo-arch',layer3:'demo-arch',
+    guide:'demo-tools',knockout:'demo-tools',combo:'demo-tools',causality:'demo-tools',rna:'demo-tools',ace:'demo-tools',deg:'demo-tools',pathway:'demo-tools',drug:'demo-tools',deconv:'demo-tools',sc:'demo-tools',multiomics:'demo-tools',gwas:'demo-tools',perturb:'demo-tools',safety:'demo-tools',resistance:'demo-tools',viz:'demo-tools',pipeline:'demo-tools',counterfactual:'demo-tools',stratify:'demo-tools',
+    phases:'demo-phases',qc:'demo-qc',engines:'demo-engines',fullpipe:'demo-fullpipe'
+  };
+  const elId=targets[type];if(!elId)return;
+  const el=document.getElementById(elId);el.classList.add('show');el.scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  if(type==='layer1'||type==='layer2'||type==='layer3') return demoArch();
+  if(type==='phases') return demoPhases();
+  if(type==='qc') return demoQC();
+  if(type==='engines') return demoEngines();
+  if(type==='fullpipe') return demoFullPipe();
+  // All tool demos
+  demoTool(type);
+}
+
+function demoArch(){
+  const layers=['Layer 1: Population','Layer 2: Contextualization','Layer 3: Causal'];
+  const scores=[0.85,0.72,0.91];const genes=[2847,486,127];
+  mk('ch-arch-bar',{type:'bar',data:{labels:layers,datasets:[{label:'QC Pass Rate',data:scores.map(v=>+(v*100).toFixed(0)),backgroundColor:['rgba(100,181,246,0.5)','rgba(206,147,216,0.5)','rgba(129,199,132,0.5)'],borderColor:['#64b5f6','#ce93d8','#81c784'],borderWidth:2},{label:'Genes Surviving',data:genes,backgroundColor:['rgba(100,181,246,0.15)','rgba(206,147,216,0.15)','rgba(129,199,132,0.15)'],borderColor:['#64b5f6','#ce93d8','#81c784'],borderWidth:1,yAxisID:'y2'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}},scales:{y:{title:{display:true,text:'QC Pass %'},max:100},y2:{position:'right',title:{display:true,text:'Genes'},grid:{display:false}}}}});
+  mk('ch-arch-pie',{type:'doughnut',data:{labels:['GWAS','MR','eQTL','CRISPR','SIGNOR','Temporal','Pathway'],datasets:[{data:[22,18,16,14,12,8,10],backgroundColor:C.slice(0,7)}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}}}});
+}
+
+function demoPhases(){
+  const phases=['Foundation','Importance','Calculus','Perturbation','Pharma','Stratification','Arbitration'];
+  const passed=phases.map(()=>Math.floor(R(3,5)));const failed=passed.map(p=>4-p);
+  mk('ch-phases-bar',{type:'bar',data:{labels:phases,datasets:[{label:'Passed',data:passed,backgroundColor:'rgba(129,199,132,0.5)',borderColor:'#81c784',borderWidth:2},{label:'Failed',data:failed,backgroundColor:'rgba(239,154,154,0.5)',borderColor:'#ef9a9a',borderWidth:2}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}},scales:{x:{stacked:true},y:{stacked:true,max:4,title:{display:true,text:'Modules'}}}}});
+  const tp=passed.reduce((a,b)=>a+b);const tf=failed.reduce((a,b)=>a+b);
+  mk('ch-phases-pie',{type:'doughnut',data:{labels:['Passed ('+tp+')','Failed ('+tf+')'],datasets:[{data:[tp,tf],backgroundColor:['rgba(129,199,132,0.7)','rgba(239,154,154,0.7)']}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}}}});
+}
+
+function demoQC(){
+  const cats=['Causal Language','Edge Fabrication','Effect Inflation','Confounder Blind','Mechanism Fab','Statistical','Aggregation'];
+  const detected=cats.map(()=>Math.floor(R(0,8)));
+  mk('ch-qc-bar',{type:'bar',data:{labels:cats.map(c=>c.substring(0,14)),datasets:[{label:'Detected',data:detected,backgroundColor:detected.map(d=>d>4?'rgba(239,154,154,0.5)':'rgba(255,183,77,0.5)'),borderColor:detected.map(d=>d>4?'#ef9a9a':'#ffb74d'),borderWidth:2}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}});
+  mk('ch-qc-pie',{type:'doughnut',data:{labels:['PASS','WARN','FAIL'],datasets:[{data:[78,15,7],backgroundColor:['rgba(129,199,132,0.7)','rgba(255,183,77,0.7)','rgba(239,154,154,0.7)']}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10}}}}});
+}
+
+function demoEngines(){
+  const genes6=GENES.slice(0,6);
+  mk('ch-eng-drug',{type:'bar',data:{labels:genes6,datasets:[{label:'Druggability',data:genes6.map(()=>+R(.3,.95).toFixed(2)),backgroundColor:CA.slice(0,6),borderColor:C.slice(0,6),borderWidth:2}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:1}}}});
+  const models=['Bliss','HSA','Loewe','ZIP','Epistasis','Compensation','Cascade','Isoform','Feedback','Collateral','Epigenetic','ncRNA'];
+  mk('ch-eng-syn',{type:'bar',data:{labels:models,datasets:[{label:'Synergy Score',data:models.map(()=>+R(-.3,.5).toFixed(3)),backgroundColor:models.map((_,i)=>i<6?'rgba(100,181,246,0.4)':'rgba(206,147,216,0.4)'),borderColor:models.map((_,i)=>i<6?'#64b5f6':'#ce93d8'),borderWidth:2}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Score'}}}}});
+  mk('ch-eng-safety',{type:'radar',data:{labels:['Essentiality','Pleiotropy','Off-Target','Toxicity','Therapeutic Window'],datasets:[{label:'KRAS',data:[.35,.62,.71,.82,.48].map(v=>+v.toFixed(2)),backgroundColor:'rgba(100,181,246,0.15)',borderColor:'#64b5f6',borderWidth:2,pointBackgroundColor:'#64b5f6'},{label:'TP53',data:[.85,.78,.42,.65,.31].map(v=>+v.toFixed(2)),backgroundColor:'rgba(239,154,154,0.15)',borderColor:'#ef9a9a',borderWidth:2,pointBackgroundColor:'#ef9a9a'}]},options:{scales:{r:{beginAtZero:true,max:1,ticks:{display:false},grid:{color:'rgba(255,255,255,0.06)'}}},plugins:{legend:{position:'bottom',labels:{boxWidth:10}}}}});
+  mk('ch-eng-resist',{type:'doughnut',data:{labels:['Feedback Loops','Bypass Pathways','Efflux/Metabolism','Target Mutations','Redundancy'],datasets:[{data:[72,61,28,32,45],backgroundColor:C.slice(0,5)}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}}}});
+}
+
+function demoTool(type){
+  const el=document.getElementById('demo-tools-content');
+  const toolNames={guide:'Guide Design (BRAF — SpCas9)',knockout:'Knockout Prediction (8 genes)',combo:'Combination Synergy (BRAF × KRAS)',rna:'RNA Engine (HOTAIR — Cas13d)',ace:'ACE Scoring (12 genes, 15 streams)',deg:'DEG Analysis (PDAC, 12 genes)',pathway:'Pathway Enrichment (10 pathways)',drug:'Drug Discovery (6 targets)',deconv:'Immune Deconvolution (xCell)',sc:'Single-Cell (14 clusters)',multiomics:'Multi-Omics (3 layers, MOFA+)',gwas:'GWAS/MR (8 genes, 5 MR methods)',perturb:'Perturbation (6 gene cross-modal)',safety:'Safety Assessment (KRAS, 5D)',resistance:'Resistance Prediction (BRAF, 5 types)',viz:'Visualization Demo',pipeline:'Full Pipeline (837 modules)',counterfactual:'Counterfactual (do(KRAS=KO))',stratify:'Patient Stratification (4 subgroups)'};
+
+  // Unique canvas IDs
+  const c1='ch-t-'+type+'-1',c2='ch-t-'+type+'-2';
+
+  el.innerHTML=`<div class="demo-header"><h4>${toolNames[type]||type}</h4><span class="tag tag-green">Demo Complete</span></div><div class="plot-row"><div class="plot-box"><h5>${getPlot1Label(type)}</h5><canvas id="${c1}"></canvas></div><div class="plot-box"><h5>${getPlot2Label(type)}</h5><canvas id="${c2}"></canvas></div></div>`;
+
+  setTimeout(()=>{buildToolChart(type,c1,c2)},100);
+}
+
+function getPlot1Label(t){const m={guide:'Guide Composite Scores',knockout:'Ensemble Scores (Ranked)',combo:'12-Model Synergy Contributions',rna:'Knockdown Efficiency',ace:'ACE Scores (Ranked)',deg:'Volcano Plot (log2FC vs p-value)',pathway:'Top Pathways (-log10 p)',drug:'Druggability Scores',deconv:'Cell Type Proportions',sc:'UMAP Clusters',multiomics:'Factor Variance',gwas:'Manhattan-Style Plot',perturb:'Synergy Heatmap',safety:'Safety Radar (5D)',resistance:'Mechanism Probabilities',viz:'Sample Volcano',pipeline:'Stage Completion Times',counterfactual:'Baseline vs do(KO)',stratify:'Subgroup Sizes'};return m[t]||'Results'}
+function getPlot2Label(t){const m={guide:'GC Content Distribution',knockout:'Method Contributions (Radar)',combo:'Classical vs Cross-Modal',rna:'Score Distribution',ace:'Essentiality Classification',deg:'Expression Bar Chart',pathway:'Category Distribution',drug:'Drug Categories',deconv:'Immune Composition',sc:'Cell Type Counts',multiomics:'Layer Contributions',gwas:'MR Causal Estimates',perturb:'Top Perturbation Effects',safety:'Essentiality Risk',resistance:'Resistance Breakdown',viz:'Sample Heatmap',pipeline:'Gene Rankings (Radar)',counterfactual:'Effect Propagation',stratify:'Response Rates'};return m[t]||'Distribution'}
+
+function buildToolChart(type,c1,c2){
+  const genes8=GENES.slice(0,8);
+  // Chart 1: usually a bar/scatter
+  if(type==='deg'||type==='viz'){
+    const data=GENES.map(()=>({x:R(-3,3),y:R(0.5,10)}));
+    mk(c1,{type:'scatter',data:{datasets:[{label:'Significant',data:data.filter(d=>Math.abs(d.x)>1&&d.y>1.3),backgroundColor:'rgba(239,154,154,0.7)',pointRadius:6},{label:'Non-sig',data:data.filter(d=>!(Math.abs(d.x)>1&&d.y>1.3)),backgroundColor:'rgba(144,164,174,0.4)',pointRadius:4}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:8}}},scales:{x:{title:{display:true,text:'log2FC'}},y:{title:{display:true,text:'-log10(p)'}}}}});
+  } else if(type==='safety'){
+    mk(c1,{type:'radar',data:{labels:['Essentiality','Pleiotropy','Off-Target','Toxicity','Ther. Window'],datasets:[{label:'KRAS',data:[.35,.62,.71,.82,.48],backgroundColor:'rgba(100,181,246,0.15)',borderColor:'#64b5f6',borderWidth:2,pointBackgroundColor:'#64b5f6'}]},options:{scales:{r:{beginAtZero:true,max:1,ticks:{display:false},grid:{color:'rgba(255,255,255,0.06)'}}},plugins:{legend:{display:false}}}});
+  } else if(type==='sc'){
+    const pts=[];for(let ci=0;ci<6;ci++){const cx=R(-4,4),cy=R(-4,4);for(let i=0;i<15;i++)pts.push({x:+(cx+R(-1.2,1.2)).toFixed(2),y:+(cy+R(-1.2,1.2)).toFixed(2),c:ci})}
+    const clusters=['Ductal','Acinar','Stellate','Macrophages','CD8+ T','B cells'];
+    mk(c1,{type:'scatter',data:{datasets:clusters.map((cl,ci)=>({label:cl,data:pts.filter(p=>p.c===ci),backgroundColor:C[ci]+'88',pointRadius:3}))},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:9}}}},scales:{x:{title:{display:true,text:'UMAP-1'}},y:{title:{display:true,text:'UMAP-2'}}}}});
+  } else if(type==='gwas'){
+    mk(c1,{type:'scatter',data:{datasets:[{label:'GWAS Hits',data:genes8.map(()=>({x:Math.floor(R(1,22)),y:R(3,14)})),backgroundColor:genes8.map(()=>R(0,1)>.5?'rgba(239,154,154,0.7)':'rgba(100,181,246,0.5)'),pointRadius:genes8.map(()=>R(0,1)>.5?7:5)}]},options:{plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Chromosome'},min:0,max:23},y:{title:{display:true,text:'-log10(p)'}}}}});
+  } else if(type==='counterfactual'){
+    mk(c1,{type:'bar',data:{labels:['Baseline','do(KRAS=KO)','do(KRAS=OE)','do(PIK3CA=KO)','do(Combo)'],datasets:[{label:'Disease Score',data:[0.85,0.32,1.12,0.61,0.18],backgroundColor:['rgba(144,164,174,0.5)','rgba(100,181,246,0.5)','rgba(239,154,154,0.5)','rgba(206,147,216,0.5)','rgba(129,199,132,0.5)'],borderColor:['#90a4ae','#64b5f6','#ef9a9a','#ce93d8','#81c784'],borderWidth:2}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Disease Score'},max:1.3}}}});
+  } else {
+    const labels=type==='combo'?['Bliss','HSA','Loewe','ZIP','Epistasis','Comp','Cascade','Isoform','Feedback','Collateral','Epigen','ncRNA']:type==='pathway'?['MAPK','PI3K-Akt','p53','Ras','Cell Cycle','Apoptosis','PDAC','ErbB','Wnt','mTOR']:type==='resistance'?['Feedback','Bypass','Efflux','Mutations','Redundancy']:type==='pipeline'?['DEG','Pathways','CRISPR','Knockout','Combos','Causality','Drugs','Report']:genes8;
+    const vals=labels.map(()=>+R(.2,.95).toFixed(3));
+    mk(c1,{type:'bar',data:{labels,datasets:[{label:'Score',data:vals,backgroundColor:CA.slice(0,labels.length),borderColor:C.slice(0,labels.length),borderWidth:2}]},options:{indexAxis:type==='pathway'||type==='ace'?'y':'x',plugins:{legend:{display:false}},scales:{[type==='pathway'||type==='ace'?'x':'y']:{beginAtZero:true,title:{display:true,text:'Score'}}}}});
+  }
+
+  // Chart 2: usually a doughnut/radar/pie
+  if(type==='knockout'||type==='pipeline'){
+    const mLabels=type==='knockout'?['Topological','Bayesian','Monte Carlo','Pathway','Feedback','ODE','Mutual Info']:['Knockout','Synergy','Causality','Druggability','ACE','Safety'];
+    mk(c2,{type:'radar',data:{labels:mLabels,datasets:[{label:type==='knockout'?'KRAS':'Top Gene',data:mLabels.map(()=>+R(.3,.95).toFixed(2)),backgroundColor:'rgba(100,181,246,0.15)',borderColor:'#64b5f6',borderWidth:2,pointBackgroundColor:'#64b5f6'},{label:type==='knockout'?'BRAF':'2nd Gene',data:mLabels.map(()=>+R(.3,.95).toFixed(2)),backgroundColor:'rgba(206,147,216,0.15)',borderColor:'#ce93d8',borderWidth:2,pointBackgroundColor:'#ce93d8'}]},options:{scales:{r:{beginAtZero:true,max:1,ticks:{display:false},grid:{color:'rgba(255,255,255,0.06)'}}},plugins:{legend:{position:'bottom',labels:{boxWidth:10}}}}});
+  } else if(type==='stratify'){
+    mk(c2,{type:'bar',data:{labels:['EGFR-Driven','KRAS-MYC','Immune-Evasion','Multi-Pathway'],datasets:[{label:'Response Rate %',data:[82,45,71,18],backgroundColor:['rgba(100,181,246,0.5)','rgba(239,154,154,0.5)','rgba(129,199,132,0.5)','rgba(255,183,77,0.5)'],borderColor:['#64b5f6','#ef9a9a','#81c784','#ffb74d'],borderWidth:2}]},options:{plugins:{legend:{display:false}},scales:{y:{max:100,title:{display:true,text:'Response %'}}}}});
+  } else if(type==='counterfactual'){
+    mk(c2,{type:'bar',data:{labels:GENES.slice(0,8),datasets:[{label:'Effect from do(KRAS=KO)',data:GENES.slice(0,8).map(()=>+R(-.5,.1).toFixed(3)),backgroundColor:GENES.slice(0,8).map(()=>'rgba(100,181,246,0.4)'),borderColor:'#64b5f6',borderWidth:1}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Effect Size'}}}}});
+  } else {
+    const pieLabels=type==='combo'?['Classical (6)','Cross-Modal (6)']:type==='drug'?['Small Molecule','Biologic','Repurposed']:type==='ace'||type==='safety'?['Core Essential','Non-Essential']:type==='deconv'?['CD8+ T','CD4+ T','NK','B cells','M1','M2','DC','Tregs']:type==='sc'?['Ductal','Acinar','Stellate','Macrophages','T cells','B cells']:type==='multiomics'?['Genomics','Transcriptomics','Epigenomics']:type==='gwas'?['IVW','MR-Egger','W.Median','MR-PRESSO','CAUSE']:type==='resistance'?['Blocked','Unblocked']:['Category A','Category B','Category C'];
+    mk(c2,{type:'doughnut',data:{labels:pieLabels,datasets:[{data:pieLabels.map(()=>Math.floor(R(10,50))),backgroundColor:C.slice(0,pieLabels.length)}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}}}});
+  }
+}
+
+function demoFullPipe(){
+  const el=document.getElementById('demo-fullpipe-content');
+  const stages=['DEG Analysis','Pathway Enrichment','CRISPR Guide Design','Knockout Prediction','Combination Synergy','Causality (7 phases)','Drug Discovery','QC + Report'];
+  let cur=0;
+  function tick(){
+    if(cur>=stages.length){
+      el.innerHTML+=`<div style="margin-top:16px;padding:14px;border-radius:12px;background:rgba(129,199,132,0.06);border:1px solid rgba(129,199,132,0.15);text-align:center"><strong style="color:var(--green)">Pipeline Complete</strong> — 8/8 stages &bull; 837 modules &bull; All QC gates passed</div><div class="plot-row"><div class="plot-box"><h5>Stage Times</h5><canvas id="ch-fp-bar"></canvas></div><div class="plot-box"><h5>Top Gene Summary (Radar)</h5><canvas id="ch-fp-radar"></canvas></div></div>`;
+      setTimeout(()=>{
+        mk('ch-fp-bar',{type:'bar',data:{labels:stages.map(s=>s.substring(0,14)),datasets:[{label:'Time (s)',data:stages.map(()=>+R(.5,3.5).toFixed(1)),backgroundColor:CA.slice(0,8),borderColor:C.slice(0,8),borderWidth:2}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Seconds'}}}}});
+        mk('ch-fp-radar',{type:'radar',data:{labels:['Knockout','Synergy','Causality','Druggability','Safety','ACE'],datasets:['KRAS','BRAF','TP53'].map((g,i)=>({label:g,data:[R(.4,.95),R(.4,.95),R(.4,.95),R(.4,.95),R(.4,.95),R(.4,.95)].map(v=>+v.toFixed(2)),backgroundColor:C[i]+'22',borderColor:C[i],borderWidth:2,pointBackgroundColor:C[i]}))},options:{scales:{r:{beginAtZero:true,max:1,ticks:{display:false},grid:{color:'rgba(255,255,255,0.06)'}}},plugins:{legend:{position:'bottom',labels:{boxWidth:10}}}}});
+      },100);
+      return}
+    const pct=((cur+1)/stages.length*100).toFixed(0);
+    el.innerHTML=`<div class="demo-header"><h4>Full Pipeline — Running...</h4><span class="tag tag-blue">${pct}%</span></div>`+stages.map((s,i)=>{const done=i<cur;const act=i===cur;return`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:4px;border-radius:8px;background:${act?'rgba(100,181,246,0.05)':'transparent'};border:1px solid ${act?'rgba(100,181,246,0.15)':'transparent'}"><div style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;${done?'background:var(--green);color:#fff':act?'background:rgba(100,181,246,0.2);color:var(--blue)':'background:var(--surface);color:var(--text2)'}">${done?'&#10003;':i+1}</div><span style="font-size:0.82rem;font-weight:${act?'600':'400'};color:${done?'var(--green)':act?'var(--heading)':'var(--text2)'}">${s}</span>${act?'<span style="margin-left:auto;font-size:0.65rem;color:var(--blue)">Running...</span>':''}</div>`}).join('')+`<div style="margin-top:8px;height:6px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden"><div style="height:100%;width:${pct}%;border-radius:3px;background:linear-gradient(90deg,#64b5f6,#ce93d8);transition:width 0.4s"></div></div>`;
+    cur++;setTimeout(tick,700);
+  }
+  tick();
+}
+
+/* Contact form */
 function submitContact(e){
   e.preventDefault();
   const btn=document.getElementById('send-btn');btn.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite"></span> Sending...</span>';btn.disabled=true;
@@ -389,7 +549,6 @@ function submitContact(e){
   .finally(()=>{btn.innerHTML='&#9993; Send Message';btn.disabled=false});
   return false;
 }
-/* Nav scroll effect */
 window.addEventListener('scroll',()=>{document.querySelector('.nav').style.background=window.scrollY>50?'rgba(6,9,24,0.95)':'rgba(6,9,24,0.8)'});
 </script>
 </body>
