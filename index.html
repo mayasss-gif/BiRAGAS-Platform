@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BiRAGAS — Autonomous Pharmaceutical Discovery Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060918;--surface:rgba(255,255,255,0.035);--surface2:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.08);--border-hover:rgba(100,181,246,0.3);--text:#d1d5e8;--text2:rgba(255,255,255,0.5);--heading:#fff;--blue:#64b5f6;--purple:#ce93d8;--green:#81c784;--red:#ef9a9a;--orange:#ffb74d;--pink:#f48fb1;--cyan:#4dd0e1;--blue-bg:rgba(100,181,246,0.08);--purple-bg:rgba(206,147,216,0.08);--green-bg:rgba(129,199,132,0.08);--gradient:linear-gradient(135deg,#64b5f6,#ce93d8);--sans:'Inter',system-ui,sans-serif;--serif:'Playfair Display',Georgia,serif;--radius:16px;--glass:rgba(255,255,255,0.03);--shadow:0 8px 32px rgba(0,0,0,0.3)}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:rgba(100,181,246,0.3)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(6,9,24,0.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:all 0.3s}
+.nav .logo{font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:-0.5px;display:flex;align-items:center;gap:8px;text-decoration:none}
+.nav .logo span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;gap:4px;align-items:center}
+.nav-links a{color:var(--text2);font-size:0.78rem;font-weight:500;text-decoration:none;padding:7px 14px;border-radius:8px;transition:all 0.2s;cursor:pointer}
+.nav-links a:hover{color:#fff;background:var(--surface)}
+.nav-cta{background:var(--gradient)!important;color:#fff!important;font-weight:600!important;padding:7px 18px!important;border-radius:10px!important;box-shadow:0 4px 20px rgba(100,181,246,0.3)}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 40px 80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(100,181,246,0.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(206,147,216,0.06) 0%,transparent 50%)}
+.glow{position:absolute;width:500px;height:500px;border-radius:50%;filter:blur(150px);opacity:0.12;pointer-events:none}
+.glow-1{background:#64b5f6;top:-100px;left:20%}.glow-2{background:#ce93d8;bottom:-100px;right:20%}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:30px;background:var(--surface);border:1px solid var(--border);font-size:0.75rem;color:var(--text);margin-bottom:24px}
+.hero-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.hero-title{font-family:var(--serif);font-size:clamp(3rem,6vw,5.5rem);font-weight:700;color:var(--heading);line-height:1.08;letter-spacing:-2px;margin-bottom:6px}
+.hero-title em{font-style:italic;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub2{font-family:var(--serif);font-size:clamp(1.4rem,3vw,2.4rem);font-weight:700;color:var(--heading);letter-spacing:-0.5px;margin-bottom:20px}
+.hero-sub2 em{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-desc{font-size:1.1rem;color:var(--text2);max-width:700px;margin:0 auto 36px;line-height:1.65;font-weight:300}
+.hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-hero{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:14px;font-size:0.95rem;font-weight:600;border:none;cursor:pointer;font-family:var(--sans);transition:all 0.3s;text-decoration:none}
+.btn-primary{background:var(--gradient);color:#fff;box-shadow:0 4px 25px rgba(100,181,246,0.35)}.btn-primary:hover{box-shadow:0 8px 40px rgba(100,181,246,0.5);transform:translateY(-2px)}
+.btn-secondary{background:var(--surface);color:#fff;border:1px solid var(--border)}.btn-secondary:hover{border-color:var(--border-hover);background:var(--surface2)}
+.stats-banner{display:flex;justify-content:center;gap:48px;flex-wrap:wrap;margin-top:56px;position:relative;z-index:1}
+.stat-item{text-align:center}.stat-num{font-family:var(--serif);font-size:2.8rem;font-weight:800;line-height:1;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.stat-label{font-size:0.65rem;color:var(--text2);margin-top:6px;text-transform:uppercase;letter-spacing:1.5px;font-weight:500}
+
+/* Sections */
+.section{padding:100px 40px;max-width:1200px;margin:0 auto}
+.section-label{font-size:0.7rem;font-weight:600;color:var(--blue);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px}
+.section-title{font-family:var(--serif);font-size:clamp(1.8rem,3.5vw,3rem);font-weight:700;color:var(--heading);line-height:1.15;margin-bottom:14px;letter-spacing:-0.5px}
+.section-title em{font-style:italic;color:var(--blue)}
+.section-sub{font-size:1rem;color:var(--text2);max-width:600px;line-height:1.6;font-weight:300}
+
+/* 3-Layer Architecture */
+.arch-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:40px}
+.arch-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:32px;position:relative;overflow:hidden;transition:all 0.4s}
+.arch-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient);transform:scaleX(0);transition:transform 0.4s;transform-origin:left}
+.arch-card:hover::before{transform:scaleX(1)}
+.arch-card:hover{border-color:var(--border-hover);transform:translateY(-4px);box-shadow:var(--shadow)}
+.arch-num{width:36px;height:36px;border-radius:50%;background:var(--gradient);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:800;margin-bottom:14px}
+.arch-card h3{font-size:1.1rem;font-weight:700;color:var(--heading);margin-bottom:8px}
+.arch-card p{font-size:0.82rem;color:var(--text2);line-height:1.55}
+
+/* Feature grid */
+.features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px}
+.feature-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:all 0.35s;cursor:pointer;position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gradient);transform:scaleX(0);transition:transform 0.35s;transform-origin:left}
+.feature-card:hover::before{transform:scaleX(1)}
+.feature-card:hover{border-color:var(--border-hover);transform:translateY(-3px);box-shadow:var(--shadow)}
+.feature-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:12px}
+.feature-card h4{font-size:0.88rem;font-weight:700;color:var(--heading);margin-bottom:5px}
+.feature-card p{font-size:0.75rem;color:var(--text2);line-height:1.5}
+.feature-badge{display:inline-block;font-size:0.58rem;font-weight:700;padding:3px 8px;border-radius:6px;margin-top:8px;letter-spacing:0.5px;text-transform:uppercase}
+
+/* Phases */
+.phase-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:36px}
+.phase-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all 0.3s}
+.phase-card:hover{border-color:var(--border-hover);box-shadow:var(--shadow)}
+.phase-card h4{font-size:0.82rem;font-weight:700;color:var(--heading);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.phase-card p{font-size:0.72rem;color:var(--text2);line-height:1.5}
+
+/* QC Shield */
+.qc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:36px}
+.qc-card{padding:24px;border-radius:var(--radius);transition:all 0.3s}
+.qc-card:hover{transform:translateY(-2px)}
+.qc-card h4{font-size:0.92rem;font-weight:700;margin-bottom:8px}
+.qc-card p{font-size:0.8rem;color:var(--text2);line-height:1.55}
+
+/* Tags */
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.62rem;font-weight:600;margin:2px}
+.tag-blue{background:rgba(100,181,246,0.12);color:var(--blue);border:1px solid rgba(100,181,246,0.2)}
+.tag-purple{background:rgba(206,147,216,0.12);color:var(--purple);border:1px solid rgba(206,147,216,0.2)}
+.tag-green{background:rgba(129,199,132,0.12);color:var(--green);border:1px solid rgba(129,199,132,0.2)}
+.tag-orange{background:rgba(255,183,77,0.12);color:var(--orange);border:1px solid rgba(255,183,77,0.2)}
+.tag-red{background:rgba(239,154,154,0.12);color:var(--red);border:1px solid rgba(239,154,154,0.2)}
+.tag-cyan{background:rgba(77,208,225,0.12);color:var(--cyan);border:1px solid rgba(77,208,225,0.2)}
+.tag-pink{background:rgba(244,143,177,0.12);color:var(--pink);border:1px solid rgba(244,143,177,0.2)}
+
+/* Cap grid */
+.cap-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:36px}
+.cap-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:28px;transition:all 0.3s}
+.cap-card:hover{border-color:var(--border-hover);box-shadow:var(--shadow)}
+.cap-card h3{font-size:1.05rem;font-weight:700;color:var(--heading);margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.cap-card p{font-size:0.82rem;color:var(--text2);line-height:1.6}
+.cap-card table{width:100%;margin-top:12px;border-collapse:collapse;font-size:0.76rem}
+.cap-card th{text-align:left;padding:7px 10px;color:var(--text2);font-size:0.62rem;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)}
+.cap-card td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.03)}
+
+/* Pipeline flow */
+.flow{display:flex;gap:0;align-items:stretch;margin-top:36px}
+.flow-step{flex:1;text-align:center;padding:28px 16px;background:var(--glass);border:1px solid var(--border);position:relative;transition:all 0.3s}
+.flow-step:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.flow-step:last-child{border-radius:0 var(--radius) var(--radius) 0}
+.flow-step:hover{background:var(--surface2);border-color:var(--border-hover)}
+.flow-num{width:36px;height:36px;border-radius:50%;background:var(--gradient);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:800;margin-bottom:10px}
+.flow-step h4{font-size:0.88rem;font-weight:700;color:var(--heading);margin-bottom:4px}
+.flow-step p{font-size:0.72rem;color:var(--text2)}
+.flow-arrow{display:flex;align-items:center;color:var(--blue);font-size:1.5rem;opacity:0.4;margin:0 -1px;z-index:1}
+
+/* Contact */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:0.68rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);color:#fff;font-size:0.85rem;font-family:var(--sans);transition:all 0.2s;outline:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(100,181,246,0.1)}
+.form-textarea{resize:vertical;min-height:80px}
+.form-select option{background:#1a1a3e}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:12px 28px;border-radius:10px;font-size:0.88rem;font-weight:600;border:none;cursor:pointer;font-family:var(--sans);transition:all 0.2s}
+.btn-send{background:var(--gradient);color:#fff;box-shadow:0 4px 20px rgba(100,181,246,0.3)}.btn-send:hover{box-shadow:0 6px 30px rgba(100,181,246,0.5);transform:translateY(-1px)}
+
+/* Footer */
+.footer{text-align:center;padding:40px;border-top:1px solid var(--border);font-size:0.68rem;color:var(--text2)}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:1000px){.features-grid,.phase-grid{grid-template-columns:1fr 1fr}.arch-grid,.cap-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.flow{flex-direction:column}.flow-step{border-radius:var(--radius)!important}}
+@media(max-width:600px){.features-grid{grid-template-columns:1fr}.phase-grid{grid-template-columns:1fr}.hero{padding:100px 20px 60px}.section{padding:60px 20px}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#hero" class="logo">&#x1F9EC; BiRAGAS <span>Platform</span></a>
+  <div class="nav-links">
+    <a href="#architecture">Architecture</a>
+    <a href="#tools">Tools</a>
+    <a href="#causality">Causality</a>
+    <a href="#qc">QC Shield</a>
+    <a href="#engines">Engines</a>
+    <a href="#pipeline">Pipeline</a>
+    <a href="#contact" class="nav-cta">Contact Us &rarr;</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="glow glow-1"></div><div class="glow glow-2"></div>
+  <div style="position:relative;z-index:1">
+    <div class="hero-badge"><div class="dot"></div> 837+ modules &bull; Production-ready &bull; v3.0</div>
+    <h1 class="hero-title">BiRAGAS <em>Platform</em></h1>
+    <p style="font-family:var(--serif);font-size:clamp(1rem,1.8vw,1.3rem);color:rgba(255,255,255,0.5);font-style:italic;margin-bottom:8px">The Autonomous Pharmaceutical Discovery Engine</p>
+    <h2 class="hero-sub2">From Genomic Data to <em>Causal Drug Targets</em></h2>
+    <p class="hero-desc">3-layer causal discovery &bull; 7-phase causality framework &bull; 23 validated modules &bull; Hallucination-shielded AI &bull; Cross-modal CRISPR at 88.9 billion scale &bull; End-to-end drug candidate pipeline.</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-hero btn-primary">&#9993; Contact Us</a>
+      <a href="https://mayasss-gif.github.io/BiRAGAS-Unified-Presentation/" target="_blank" class="btn-hero btn-secondary">&#127909; Watch Presentation</a>
+      <a href="https://mayasss-gif.github.io/BiRAGAS-Unified-App/" target="_blank" class="btn-hero btn-secondary">&#9654; Live Demo</a>
+    </div>
+    <div class="stats-banner">
+      <div class="stat-item"><div class="stat-num">837+</div><div class="stat-label">Python Modules</div></div>
+      <div class="stat-item"><div class="stat-num">23</div><div class="stat-label">Causality Modules</div></div>
+      <div class="stat-item"><div class="stat-num">88.9B</div><div class="stat-label">Combinations</div></div>
+      <div class="stat-item"><div class="stat-num">7</div><div class="stat-label">Causal Phases</div></div>
+      <div class="stat-item"><div class="stat-num">3</div><div class="stat-label">QC Layers</div></div>
+      <div class="stat-item"><div class="stat-num">17</div><div class="stat-label">API Endpoints</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3-LAYER ARCHITECTURE -->
+<section class="section" id="architecture">
+  <div class="section-label">Core Architecture</div>
+  <div class="section-title">Three Layers of <em>Causal Intelligence</em></div>
+  <p class="section-sub">Every claim passes through three independently validated layers before reaching you. No hallucinations. No false positives. Only causation.</p>
+
+  <div class="arch-grid">
+    <div class="arch-card">
+      <div class="arch-num">1</div>
+      <h3 style="color:var(--blue)">Population Evidence</h3>
+      <p>DESeq2 differential expression, GSEA pathway enrichment, CIBERSORTx immune deconvolution. Purely correlational — <strong style="color:var(--heading)">no causal claims allowed</strong> at this layer.</p>
+      <div style="margin-top:12px"><span class="tag tag-blue">DESeq2</span><span class="tag tag-blue">GSEA</span><span class="tag tag-blue">CIBERSORTx</span><span class="tag tag-blue">EdgeR</span><span class="tag tag-blue">Limma</span></div>
+    </div>
+    <div class="arch-card">
+      <div class="arch-num">2</div>
+      <h3 style="color:var(--purple)">Contextualization</h3>
+      <p>BiRAGAS chromatin filtering + knowledge graph pruning. Maps correlations to biological plausibility using 8.6M Bio-RAG vectors. Candidates become <strong style="color:var(--heading)">plausible, not proven</strong>.</p>
+      <div style="margin-top:12px"><span class="tag tag-purple">Bio-RAG 8.6M</span><span class="tag tag-purple">KG Pruning</span><span class="tag tag-purple">Chromatin Filter</span></div>
+    </div>
+    <div class="arch-card">
+      <div class="arch-num">3</div>
+      <h3 style="color:var(--green)">Agentic Causal Reasoning</h3>
+      <p>NOTEARS structure learning + DoWhy causal graphs + EconML treatment effects + Refutation testing. Only edges surviving all tests are labeled <strong style="color:var(--heading)">causally validated</strong>.</p>
+      <div style="margin-top:12px"><span class="tag tag-green">NOTEARS</span><span class="tag tag-green">DoWhy</span><span class="tag tag-green">EconML</span><span class="tag tag-green">Refutation</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 28 TOOLS -->
+<section class="section" id="tools">
+  <div class="section-label">Platform Capabilities</div>
+  <div class="section-title">28+ Integrated Tool Suites</div>
+  <p class="section-sub">CRISPR design, causal inference, drug discovery, single-cell, multi-omics — all unified.</p>
+
+  <div class="features-grid">
+    <div class="feature-card"><div class="feature-icon" style="background:var(--blue-bg)">&#9998;</div><h4>Guide Design</h4><p>SpCas9, SaCas9, Cas12a, Cas13a/b/d, dCas13 — 18-feature scoring + RS3 ML</p><div class="feature-badge tag-blue">6 Nucleases</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--blue-bg)">&#9876;</div><h4>Knockout Engine</h4><p>7-method ensemble: Topological, Bayesian, Monte Carlo, Pathway, Feedback, ODE, MI</p><div class="feature-badge tag-blue">210,859 Configs</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--purple-bg)">&#10006;</div><h4>Combination Engine</h4><p>12 synergy models: 6 classical + 6 cross-modal (DNA&times;RNA). First-ever cross-modal predictor</p><div class="feature-badge tag-purple">88.9 Billion</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--green-bg)">&#10004;</div><h4>Causality Framework</h4><p>7-phase, 23-module pipeline — Pearl's do-calculus, MR validation, DAG self-correction</p><div class="feature-badge tag-green">23 Modules</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--purple-bg)">&#10070;</div><h4>RNA Engines</h4><p>Cas13 knockdown, base editing (A&rarr;I, C&rarr;U), CRISPRi/CRISPRa, ncRNA targeting</p><div class="feature-badge tag-purple">9 RNA Types</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--blue-bg)">&#9733;</div><h4>ACE Scoring</h4><p>15-stream Aggregated CRISPR Evidence with Bayesian confidence updating</p><div class="feature-badge tag-blue">15 Streams</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:rgba(239,154,154,0.1)">&#9650;</div><h4>DEG Pipeline</h4><p>Agentic DESeq2/EdgeR/Limma — auto-selects method, fixes errors, maps genes</p><div class="feature-badge tag-red">7 Tools</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--green-bg)">&#9783;</div><h4>Pathway Enrichment</h4><p>5-stage pipeline: KEGG, Reactome, GO with deduplication and consolidation</p><div class="feature-badge tag-green">KEGG/Reactome/GO</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:rgba(255,183,77,0.1)">&#9764;</div><h4>Drug Discovery</h4><p>KEGG drug mapping + 7-dimension target ranking + druggability scoring</p><div class="feature-badge tag-orange">7D Ranking</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--purple-bg)">&#9673;</div><h4>Deconvolution</h4><p>xCell (64 types), CIBERSORTx (22 immune), Bisque (reference-based)</p><div class="feature-badge tag-purple">3 Methods</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--blue-bg)">&#9679;</div><h4>Single-Cell</h4><p>10x Genomics: QC &rarr; PCA &rarr; UMAP &rarr; Leiden &rarr; Perturb-seq/CROP-seq</p><div class="feature-badge tag-blue">10x Pipeline</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--green-bg)">&#9881;</div><h4>Multi-Omics</h4><p>5-layer MOFA+ integration: genomics, transcriptomics, epigenomics, proteomics, metabolomics</p><div class="feature-badge tag-green">5 Layers</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:rgba(239,154,154,0.1)">&#9670;</div><h4>GWAS / MR</h4><p>5-method MR: IVW, Egger, Weighted Median, MR-PRESSO, CAUSE + sensitivity</p><div class="feature-badge tag-red">5 MR Methods</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:rgba(255,183,77,0.1)">&#9655;</div><h4>Perturbation</h4><p>Cross-modal DNA&times;RNA perturbation with counterfactual simulation</p><div class="feature-badge tag-orange">Cross-Modal</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:rgba(77,208,225,0.1)">&#128737;</div><h4>Safety Assessor</h4><p>5-dimension safety: essentiality, pleiotropy, off-target, toxicity, therapeutic window</p><div class="feature-badge tag-cyan">5D Safety</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:rgba(244,143,177,0.1)">&#9888;</div><h4>Resistance Predictor</h4><p>Feedback loops, bypass pathways, efflux, target mutations, pathway redundancy</p><div class="feature-badge tag-pink">5 Mechanisms</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--blue-bg)">&#128202;</div><h4>Visualization</h4><p>Volcano, heatmaps, UMAP, Manhattan, radar, synergy matrices — auto-generated</p><div class="feature-badge tag-blue">Auto-Plots</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--green-bg)">&#9654;</div><h4>Full Pipeline</h4><p>All 837+ modules end-to-end — DEG to drug candidates in one autonomous run</p><div class="feature-badge tag-green">837 Modules</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:var(--purple-bg)">&#128300;</div><h4>Counterfactual Sim</h4><p>Pearl's do(X) interventions: knockout, overexpress, pathway inhibition with DAG propagation</p><div class="feature-badge tag-purple">do-Calculus</div></div>
+    <div class="feature-card"><div class="feature-icon" style="background:rgba(77,208,225,0.1)">&#128101;</div><h4>Patient Stratifier</h4><p>DAG-based cohort clustering — per-patient causal architecture, not population average</p><div class="feature-badge tag-cyan">Per-Patient DAGs</div></div>
+  </div>
+</section>
+
+<!-- 7-PHASE CAUSALITY -->
+<section class="section" id="causality">
+  <div class="section-label">Causal Intelligence</div>
+  <div class="section-title">7-Phase <em>Causality</em> Framework</div>
+  <p class="section-sub">23 modules proving genes drive disease — not merely accompany it. Each phase is QC-gated.</p>
+
+  <div class="phase-grid">
+    <div class="phase-card" style="border-left:3px solid var(--blue)"><h4><span class="tag tag-blue">P1</span> Foundation</h4><p>DAG Builder + MR Validator. Consensus graph from GWAS, MR, eQTL, CRISPR, SIGNOR, temporal data. 7 evidence weights.</p></div>
+    <div class="phase-card" style="border-left:3px solid #4fc3f7"><h4><span class="tag tag-blue">P2</span> Importance</h4><p>Centrality Calculator + Target Scorer. 3-tier classification: Master Regulator &rarr; Secondary Driver &rarr; Downstream Effector.</p></div>
+    <div class="phase-card" style="border-left:3px solid var(--cyan)"><h4><span class="tag tag-cyan">P3</span> Calculus</h4><p>Causality Tester + Directionality + Confounding Checker. Confidence gating at 0.65. Steiger filtering.</p></div>
+    <div class="phase-card" style="border-left:3px solid var(--green)"><h4><span class="tag tag-green">P4</span> Perturbation</h4><p>Counterfactual Simulator + Resistance Identifier + Compensation Analyzer. do(gene=KO) propagation.</p></div>
+    <div class="phase-card" style="border-left:3px solid #aed581"><h4><span class="tag tag-green">P5</span> Pharma</h4><p>Target Ranker (7D) + Druggability + Efficacy Predictor + Safety Assessor + Combination Analyzer.</p></div>
+    <div class="phase-card" style="border-left:3px solid var(--purple)"><h4><span class="tag tag-purple">P6</span> Stratification</h4><p>Cohort Stratifier + DAG Comparator + Conserved Motifs. Patient-level DAG instantiation.</p></div>
+    <div class="phase-card" style="border-left:3px solid var(--pink)"><h4><span class="tag tag-pink">P7</span> Arbitration</h4><p>Evidence Inspector + Gap Analyzer + LLM Arbitrator + Response Formatter. Full audit trail.</p></div>
+    <div class="phase-card" style="border-left:3px solid var(--green);background:rgba(129,199,132,0.04)"><h4><span style="font-size:1rem">&#129302;</span> Agentic AI</h4><p>Self-correcting DAG: cycle removal, orphan connection, weight normalization. 9 autonomous checks.</p></div>
+  </div>
+</section>
+
+<!-- QC SHIELD -->
+<section class="section" id="qc">
+  <div class="section-label">Quality Assurance</div>
+  <div class="section-title">Hallucination <em>Shield</em></div>
+  <p class="section-sub">The pharmaceutical industry can't afford AI hallucinations. BiRAGAS prevents 7 categories of false claims with multi-layer QC gating.</p>
+
+  <div class="qc-grid">
+    <div class="qc-card" style="background:rgba(239,154,154,0.04);border:1px solid rgba(239,154,154,0.15);border-radius:var(--radius)">
+      <h4 style="color:var(--red)">7 Hallucination Categories Detected</h4>
+      <p>
+        <span class="tag tag-red">Causal Language</span> Using "causes" for correlations<br>
+        <span class="tag tag-red">Edge Fabrication</span> Reporting non-existent interactions<br>
+        <span class="tag tag-red">Effect Inflation</span> Overstating magnitudes<br>
+        <span class="tag tag-red">Confounder Blindness</span> Ignoring known confounders<br>
+        <span class="tag tag-red">Mechanism Fabrication</span> Inventing biology<br>
+        <span class="tag tag-red">Statistical Hallucination</span> Misinterpreting p-values<br>
+        <span class="tag tag-red">Aggregation Fallacy</span> Population &rarr; individual
+      </p>
+    </div>
+    <div class="qc-card" style="background:rgba(129,199,132,0.04);border:1px solid rgba(129,199,132,0.15);border-radius:var(--radius)">
+      <h4 style="color:var(--green)">Multi-Layer Prevention</h4>
+      <p>
+        <span class="tag tag-green">QC Engine</span> Fail early, fail loud philosophy<br>
+        <span class="tag tag-green">False Positive Reduction</span> FDR-controlled edge filtering<br>
+        <span class="tag tag-green">Curative Measures</span> Auto-correction decision tree<br>
+        <span class="tag tag-green">Evidence Inspector</span> 5-layer audit per edge<br>
+        <span class="tag tag-green">LLM Arbitrator</span> Conflict resolution with provenance<br>
+        <span class="tag tag-green">Confidence Gating</span> &ge;0.65 required to pass<br>
+        <span class="tag tag-green">Audit Trail</span> Full provenance tracking
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- CRISPR + DRUG ENGINES -->
+<section class="section" id="engines">
+  <div class="section-label">Core Engines</div>
+  <div class="section-title">CRISPR + Drug Discovery <em>Engines</em></div>
+
+  <div class="cap-grid">
+    <div class="cap-card">
+      <h3><span style="color:var(--blue)">&#9998;</span> CRISPR Guide Design</h3>
+      <p>6 nucleases with 18-feature heuristic + RS3 ML scoring.</p>
+      <table><tr><td>SpCas9 (NGG)</td><td style="color:var(--blue)">DNA knockout</td></tr><tr><td>SaCas9 (NNGRRT)</td><td style="color:var(--blue)">AAV-compatible KO</td></tr><tr><td>Cas12a (TTTV)</td><td style="color:var(--blue)">Multiplexed editing</td></tr><tr><td>Cas13d CasRx</td><td style="color:var(--purple)">RNA knockdown</td></tr><tr><td>dCas13-ADAR2</td><td style="color:var(--green)">A&rarr;I base editing</td></tr><tr><td>dCas13-APOBEC</td><td style="color:var(--green)">C&rarr;U base editing</td></tr></table>
+    </div>
+    <div class="cap-card">
+      <h3><span style="color:var(--purple)">&#10006;</span> 12-Model Synergy</h3>
+      <p>88.9B cross-modal combinations.</p>
+      <div style="margin-top:10px"><div style="font-size:0.68rem;color:var(--text2);font-weight:600;margin-bottom:6px">CLASSICAL (6)</div><span class="tag tag-blue">Bliss</span><span class="tag tag-blue">HSA</span><span class="tag tag-blue">Loewe</span><span class="tag tag-blue">ZIP</span><span class="tag tag-blue">Epistasis</span><span class="tag tag-blue">Compensation</span></div>
+      <div style="margin-top:10px"><div style="font-size:0.68rem;color:var(--text2);font-weight:600;margin-bottom:6px">CROSS-MODAL (6)</div><span class="tag tag-purple">Cascade</span><span class="tag tag-purple">Isoform</span><span class="tag tag-purple">Feedback</span><span class="tag tag-purple">Collateral</span><span class="tag tag-purple">Epigenetic</span><span class="tag tag-purple">ncRNA</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:14px;padding:12px;border-radius:10px;background:rgba(255,255,255,0.02)"><div style="text-align:center"><div style="font-size:1.2rem;font-weight:800;color:var(--blue)">22.2B</div><div style="font-size:0.58rem;color:var(--text2)">DNA&times;DNA</div></div><div style="text-align:center"><div style="font-size:1.2rem;font-weight:800;color:var(--purple)">22.2B</div><div style="font-size:0.58rem;color:var(--text2)">RNA&times;RNA</div></div><div style="text-align:center"><div style="font-size:1.2rem;font-weight:800;color:var(--green)">44.5B</div><div style="font-size:0.58rem;color:var(--text2)">DNA&times;RNA</div></div></div>
+    </div>
+    <div class="cap-card">
+      <h3><span style="color:var(--orange)">&#9764;</span> Drug Discovery Pipeline</h3>
+      <table><tr><td><strong style="color:var(--blue)">Step 1</strong></td><td>DEG &rarr; Target Identification</td></tr><tr><td><strong style="color:var(--green)">Step 2</strong></td><td>Pathway &rarr; Mechanism Understanding</td></tr><tr><td><strong style="color:var(--purple)">Step 3</strong></td><td>Causality &rarr; 23-Module Validation</td></tr><tr><td><strong style="color:var(--orange)">Step 4</strong></td><td>7D Ranking: Causal + Centrality + Druggability + Efficacy + Safety + Resistance + Translatability</td></tr></table>
+    </div>
+    <div class="cap-card">
+      <h3><span style="color:var(--cyan)">&#128737;</span> Safety + Resistance</h3>
+      <p><strong style="color:var(--heading)">Safety Assessor (5D):</strong> Essentiality risk, pleiotropy, off-target effects, systemic toxicity, therapeutic window.</p>
+      <p style="margin-top:10px"><strong style="color:var(--heading)">Resistance Predictor (5 types):</strong></p>
+      <div style="margin-top:6px"><span class="tag tag-red">Feedback Loops</span><span class="tag tag-orange">Bypass Pathways</span><span class="tag tag-pink">Efflux/Metabolism</span><span class="tag tag-purple">Target Mutations</span><span class="tag tag-cyan">Redundancy</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE FLOW -->
+<section class="section" id="pipeline">
+  <div class="section-label">End-to-End</div>
+  <div class="section-title">From Raw Data to <em>Drug Candidates</em></div>
+  <p class="section-sub">Fully autonomous — upload data, get causally validated therapeutic targets.</p>
+
+  <div class="flow">
+    <div class="flow-step"><div class="flow-num">1</div><h4>Upload</h4><p>Expression, GWAS, screening data — or just a disease name</p></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step"><div class="flow-num">2</div><h4>Layer 1</h4><p>DEG, pathways, deconvolution — correlational evidence</p></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step"><div class="flow-num">3</div><h4>Layer 2</h4><p>Bio-RAG contextualization + KG pruning</p></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step"><div class="flow-num">4</div><h4>Layer 3</h4><p>Causal validation — 23 modules, 7 phases</p></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step"><div class="flow-num">5</div><h4>Results</h4><p>Ranked targets, drug candidates, safety profiles, plots</p></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section" id="contact" style="max-width:800px">
+  <div style="text-align:center;margin-bottom:40px">
+    <div class="section-label">Get In Touch</div>
+    <div class="section-title">Let's Accelerate Your <em>Discovery</em></div>
+    <p class="section-sub" style="margin:0 auto">Whether you're exploring drug targets, planning CRISPR screens, or building a precision medicine pipeline — we'd love to hear from you.</p>
+  </div>
+  <form id="contact-form" onsubmit="return submitContact(event)" style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:40px">
+    <div class="form-row"><div class="form-group"><label class="form-label">First Name *</label><input class="form-input" id="cf-first" required placeholder="Jane"></div><div class="form-group"><label class="form-label">Last Name *</label><input class="form-input" id="cf-last" required placeholder="Smith"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Email *</label><input class="form-input" id="cf-email" type="email" required placeholder="jane@university.edu"></div><div class="form-group"><label class="form-label">Organization *</label><input class="form-input" id="cf-org" required placeholder="MIT, Pfizer, Stanford..."></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="cf-phone" type="tel" placeholder="+1 (555) 123-4567"></div><div class="form-group"><label class="form-label">Role</label><select class="form-select" id="cf-role"><option value="">Select...</option><option>Principal Investigator</option><option>Research Scientist</option><option>Bioinformatician</option><option>Drug Discovery Lead</option><option>Clinical Researcher</option><option>Industry Executive</option><option>Investor / BD</option><option>Other</option></select></div></div>
+    <div class="form-group" style="margin-bottom:16px"><label class="form-label">Area of Interest</label><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+      <label style="font-size:0.78rem;display:flex;gap:5px;align-items:center;color:var(--text);cursor:pointer"><input type="checkbox" name="interest" value="Causal Inference"> Causal Inference</label>
+      <label style="font-size:0.78rem;display:flex;gap:5px;align-items:center;color:var(--text);cursor:pointer"><input type="checkbox" name="interest" value="CRISPR Design"> CRISPR Design</label>
+      <label style="font-size:0.78rem;display:flex;gap:5px;align-items:center;color:var(--text);cursor:pointer"><input type="checkbox" name="interest" value="Drug Discovery"> Drug Discovery</label>
+      <label style="font-size:0.78rem;display:flex;gap:5px;align-items:center;color:var(--text);cursor:pointer"><input type="checkbox" name="interest" value="Combination Therapy"> Combination Therapy</label>
+      <label style="font-size:0.78rem;display:flex;gap:5px;align-items:center;color:var(--text);cursor:pointer"><input type="checkbox" name="interest" value="Single-Cell/Multi-Omics"> Single-Cell / Multi-Omics</label>
+      <label style="font-size:0.78rem;display:flex;gap:5px;align-items:center;color:var(--text);cursor:pointer"><input type="checkbox" name="interest" value="Partnership"> Partnership / Licensing</label>
+      <label style="font-size:0.78rem;display:flex;gap:5px;align-items:center;color:var(--text);cursor:pointer"><input type="checkbox" name="interest" value="Platform Demo"> Platform Demo</label>
+    </div></div>
+    <div class="form-group" style="margin-bottom:20px"><label class="form-label">Message *</label><textarea class="form-textarea" id="cf-message" required placeholder="Tell us about your research goals..."></textarea></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><button type="submit" class="btn btn-send" id="send-btn">&#9993; Send Message</button><span style="font-size:0.72rem;color:var(--text2)">We respond within 24 hours</span></div>
+  </form>
+  <div id="contact-success" style="display:none;text-align:center;padding:60px 40px;background:var(--glass);border:1px solid rgba(129,199,132,0.2);border-radius:var(--radius)">
+    <div style="width:80px;height:80px;border-radius:50%;background:rgba(129,199,132,0.15);border:2px solid var(--green);display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px"><span style="font-size:2.5rem;color:var(--green)">&#10003;</span></div>
+    <h3 style="font-size:1.5rem;color:var(--heading);margin-bottom:10px">Your message was sent successfully!</h3>
+    <p style="color:var(--text2);font-size:0.92rem;max-width:500px;margin:0 auto;line-height:1.6">Our team at Ayass Bioscience will get back to you within 24 hours.</p>
+    <p style="color:var(--blue);font-size:0.85rem;margin-top:16px;font-weight:600">contact@ayassbioscience.com</p>
+    <button onclick="document.getElementById('contact-form').reset();document.getElementById('contact-form').style.display='block';document.getElementById('contact-success').style.display='none'" style="margin-top:20px;padding:10px 24px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);cursor:pointer;font-family:var(--sans);font-size:0.82rem">Send Another</button>
+  </div>
+  <div style="display:flex;gap:20px;margin-top:32px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px;padding:24px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);text-align:center"><div style="font-size:1.5rem;margin-bottom:8px">&#9993;</div><div style="font-size:0.82rem;font-weight:600;color:var(--heading);margin-bottom:4px">Email</div><a href="mailto:contact@ayassbioscience.com" style="font-size:0.78rem;color:var(--blue);text-decoration:none">contact@ayassbioscience.com</a></div>
+    <div style="flex:1;min-width:200px;padding:24px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);text-align:center"><div style="font-size:1.5rem;margin-bottom:8px">&#127968;</div><div style="font-size:0.82rem;font-weight:600;color:var(--heading);margin-bottom:4px">Headquarters</div><div style="font-size:0.78rem;color:var(--text2)">Ayass Bioscience LLC<br>Frisco, Texas, USA</div></div>
+    <div style="flex:1;min-width:200px;padding:24px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);text-align:center"><div style="font-size:1.5rem;margin-bottom:8px">&#127760;</div><div style="font-size:0.82rem;font-weight:600;color:var(--heading);margin-bottom:4px">Website</div><a href="https://ayassbioscience.com" target="_blank" style="font-size:0.78rem;color:var(--blue);text-decoration:none">ayassbioscience.com</a></div>
+  </div>
+</section>
+
+<div class="footer">BiRAGAS Platform v3.0 &mdash; Ayass Bioscience LLC &mdash; 837+ modules &bull; 23 causality modules &bull; 88.9B combinations &bull; 7 causal phases &bull; 3 QC layers<br><span style="color:var(--blue)">Proprietary &amp; Confidential &mdash; 2026</span></div>
+
+<script>
+/* Contact form — sends directly via formsubmit.co */
+function submitContact(e){
+  e.preventDefault();
+  const btn=document.getElementById('send-btn');btn.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite"></span> Sending...</span>';btn.disabled=true;
+  const first=document.getElementById('cf-first').value,last=document.getElementById('cf-last').value,email=document.getElementById('cf-email').value,phone=document.getElementById('cf-phone').value,org=document.getElementById('cf-org').value,role=document.getElementById('cf-role').value,message=document.getElementById('cf-message').value;
+  const interests=Array.from(document.querySelectorAll('input[name="interest"]:checked')).map(cb=>cb.value).join(', ');
+  fetch('https://formsubmit.co/ajax/contact@ayassbioscience.com',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({_subject:'BiRAGAS Inquiry from '+first+' '+last+' — '+org,name:first+' '+last,email,phone:phone||'N/A',organization:org,role:role||'N/A',interests:interests||'N/A',message,_template:'table'})})
+  .then(r=>r.json()).then(()=>{document.getElementById('contact-form').style.display='none';document.getElementById('contact-success').style.display='block';document.getElementById('contact-success').scrollIntoView({behavior:'smooth',block:'center'})})
+  .catch(()=>{const s=encodeURIComponent('BiRAGAS Inquiry from '+first+' '+last),b=encodeURIComponent('Name: '+first+' '+last+'\nEmail: '+email+'\nOrg: '+org+'\n\n'+message);window.location.href='mailto:contact@ayassbioscience.com?subject='+s+'&body='+b;document.getElementById('contact-form').style.display='none';document.getElementById('contact-success').style.display='block'})
+  .finally(()=>{btn.innerHTML='&#9993; Send Message';btn.disabled=false});
+  return false;
+}
+/* Nav scroll effect */
+window.addEventListener('scroll',()=>{document.querySelector('.nav').style.background=window.scrollY>50?'rgba(6,9,24,0.95)':'rgba(6,9,24,0.8)'});
+</script>
+</body>
+</html>
